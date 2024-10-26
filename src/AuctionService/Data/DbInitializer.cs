@@ -194,7 +194,8 @@ public class DbInitializer
             }
         };
 
-        context.AddRange(auctions);
+        context.Auctions.AddRange(auctions);
+        context.SaveChanges();
 
     }
 }

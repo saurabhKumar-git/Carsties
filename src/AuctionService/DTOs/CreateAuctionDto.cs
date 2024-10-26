@@ -17,7 +17,6 @@ public class CreateAuctionDto
     public int Mileage { get; set; }
     [Required]
     public string ImageUrl { get; set; }
-    [Required]
     public DateTime AuctionEnd { get; set; }
     [Required]
     public int ReservePrice { get; set; }
