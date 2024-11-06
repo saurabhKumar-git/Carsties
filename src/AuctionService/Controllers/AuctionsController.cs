@@ -3,6 +3,8 @@ using AuctionService.DTOs;
 using AuctionService.Entities;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Contracts;
+using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,10 +13,12 @@ namespace AuctionService.Controllers
 {
     [Route("api/auctions")]
     [ApiController]
-    public class AuctionsController(AuctionDbContext context, IMapper mapper) : ControllerBase
+    public class AuctionsController(AuctionDbContext context, IMapper mapper, IPublishEndpoint publishEndpoint) : ControllerBase
     {
         public AuctionDbContext _context = context;
         public IMapper _mapper = mapper;
+
+        public IPublishEndpoint _publishEndpoint = publishEndpoint;
 
         [HttpGet("healthy")]
         public IActionResult Healthy()
@@ -50,14 +54,20 @@ namespace AuctionService.Controllers
             auction.Seller = "test";
 
             _context.Auctions.Add(auction);
+
+            var newAuction = _mapper.Map<AuctionsDto>(auction);
+
+            await _publishEndpoint.Publish(_mapper.Map<AuctionCreated>(newAuction));
+
             var result = await _context.SaveChangesAsync() > 0;
+
             if (!result)
             {
                 return BadRequest("Could not create Auction!");
             }
 
             var auctionId = auction.Id;
-            return CreatedAtAction(nameof(GetAuctionDetails), new { auctionId }, _mapper.Map<AuctionsDto>(auction));
+            return CreatedAtAction(nameof(GetAuctionDetails), new { auctionId }, newAuction);
         }
 
         [HttpPut("{auctionId}")]
