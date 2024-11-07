@@ -21,6 +21,8 @@ builder.Services.AddHttpClient<AuctionServiceHttpClient>().AddPolicyHandler(GetP
 builder.Services.AddMassTransit(x =>
 {
     x.AddConsumersFromNamespaceContaining<AuctionCreatedConsumer>();
+    x.AddConsumersFromNamespaceContaining<AuctionDeletedConsumer>();
+    x.AddConsumersFromNamespaceContaining<AuctionUpdatedConsumer>();
 
     x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("search", false));
 
@@ -30,6 +32,16 @@ builder.Services.AddMassTransit(x =>
         {
             e.UseMessageRetry(r => r.Interval(5, 5));
             e.ConfigureConsumer<AuctionCreatedConsumer>(context);
+        });
+        config.ReceiveEndpoint("search-auction-deleted", e =>
+        {
+            e.UseMessageRetry(r => r.Interval(5, 5));
+            e.ConfigureConsumer<AuctionDeletedConsumer>(context);
+        });
+        config.ReceiveEndpoint("search-auction-updated", e =>
+        {
+            e.UseMessageRetry(r => r.Interval(5, 5));
+            e.ConfigureConsumer<AuctionUpdatedConsumer>(context);
         });
         config.ConfigureEndpoints(context);
     });

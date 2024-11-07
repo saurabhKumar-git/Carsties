@@ -71,7 +71,7 @@ namespace AuctionService.Controllers
         }
 
         [HttpPut("{auctionId}")]
-        public async Task<ActionResult> CreateAuction(Guid auctionId, UpdateAuctionDto auctionDto)
+        public async Task<ActionResult> UpdateAuction(Guid auctionId, UpdateAuctionDto auctionDto)
         {
             var auction = await _context.Auctions.Include(x => x.Item).FirstOrDefaultAsync(x => x.Id == auctionId);
 
@@ -83,6 +83,11 @@ namespace AuctionService.Controllers
             auction.Item.Year = auctionDto.Year ?? auction.Item.Year;
 
             _context.Update(auction);
+
+            var newAuction = _mapper.Map<AuctionsDto>(auction);
+
+            await _publishEndpoint.Publish(_mapper.Map<AuctionUpdated>(newAuction));
+
             var result = await _context.SaveChangesAsync() > 0;
             if (result) return Ok();
 
@@ -99,6 +104,10 @@ namespace AuctionService.Controllers
 
             // TODO: Check seller == username
             _context.Auctions.Remove(auction);
+
+            var newAuction = _mapper.Map<AuctionsDto>(auction);
+
+            await _publishEndpoint.Publish(_mapper.Map<AuctionDeleted>(newAuction));
 
             var result = await _context.SaveChangesAsync() > 0;
 
