@@ -44,6 +44,11 @@ namespace AuctionService.Controllers
         public async Task<ActionResult<AuctionsDto>> GetAuctionDetails(Guid auctionId)
         {
             var auctions = _mapper.Map<AuctionsDto>(await _context.Auctions.Where(x => x.Id == auctionId).Include(x => x.Item).FirstOrDefaultAsync());
+
+            if (auctions == null)
+            {
+                return NotFound();
+            }
             return Ok(auctions);
         }
 
