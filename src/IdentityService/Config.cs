@@ -18,8 +18,7 @@ public static class Config
         };
 
     public static IEnumerable<Client> Clients =>
-        new Client[]
-        {
+        [
             new Client{
                 ClientId = "postman",
                 ClientName = "Postman",
@@ -27,6 +26,17 @@ public static class Config
                 RedirectUris = {"https://www.getpostman.com/oauth2/callback"},
                 ClientSecrets = [new Secret("NotASecret".Sha256())],
                 AllowedGrantTypes = {GrantType.ResourceOwnerPassword}
+            },
+            new Client{
+                ClientId = "nextApp",
+                ClientName = "NextApp",
+                AllowedScopes = {"openid","profile","auctionApp"},
+                RequirePkce = false,
+                ClientSecrets = [new Secret("NotASecret".Sha256())],
+                AllowedGrantTypes = GrantTypes.CodeAndClientCredentials,
+                RedirectUris = {"https://localhost:3000/api/auth/callback/id-server"},
+                AllowOfflineAccess = true,
+                AccessTokenLifetime = 3600*24*30
             }
-        };
+        ];
 }
