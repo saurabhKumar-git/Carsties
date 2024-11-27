@@ -36,6 +36,8 @@ builder.Services.AddMassTransit(x =>
     });
 });
 
+builder.Services.AddScoped<IAuctionRepository, AuctionRepository>();
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 .AddJwtBearer(options =>
 {
