@@ -186,18 +186,55 @@ public class AuctionControllerTests
     [Fact]
     public async Task DeleteAuction_WithValidUser_ReturnsOkResponse()
     {
-        throw new NotImplementedException();
+        //Arrange
+        var auction = _fixture.Build<Auction>().Without(x => x.Item).Create();
+        auction.Item = _fixture.Build<Item>().Without(x => x.Auction).Create();
+        auction.Seller = "test";
+
+        _auctionRepo.Setup(x => x.GetAuctionEntityById(It.IsAny<Guid>())).ReturnsAsync(auction);
+        _auctionRepo.Setup(x => x.RemoveAuction(It.IsAny<Auction>()));
+        _auctionRepo.Setup(x => x.SaveChangesAsync()).ReturnsAsync(true);
+
+        //Act
+        var result = await _controller.DeleteAuction(It.IsAny<Guid>());
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.IsType<OkResult>(result);
     }
 
     [Fact]
     public async Task DeleteAuction_WithInvalidGuid_Returns404Response()
     {
-        throw new NotImplementedException();
+        //Arrange
+        _auctionRepo.Setup(x => x.GetAuctionEntityById(It.IsAny<Guid>())).ReturnsAsync(value: null);
+        _auctionRepo.Setup(x => x.RemoveAuction(It.IsAny<Auction>()));
+        _auctionRepo.Setup(x => x.SaveChangesAsync()).ReturnsAsync(false);
+
+        //Act
+        var result = await _controller.DeleteAuction(It.IsAny<Guid>());
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.IsType<NotFoundResult>(result);
     }
 
     [Fact]
     public async Task DeleteAuction_WithInvalidUser_Returns403Response()
     {
-        throw new NotImplementedException();
+        //Arrange
+        var auction = _fixture.Build<Auction>().Without(x => x.Item).Create();
+        auction.Item = _fixture.Build<Item>().Without(x => x.Auction).Create();
+
+        _auctionRepo.Setup(x => x.GetAuctionEntityById(It.IsAny<Guid>())).ReturnsAsync(auction);
+        _auctionRepo.Setup(x => x.RemoveAuction(It.IsAny<Auction>()));
+        _auctionRepo.Setup(x => x.SaveChangesAsync()).ReturnsAsync(true);
+
+        //Act
+        var result = await _controller.DeleteAuction(It.IsAny<Guid>());
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.IsType<ForbidResult>(result);
     }
 }
